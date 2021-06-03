@@ -8,7 +8,7 @@ const pool = new Pool({
   port: 5432,
 });
 
-const runQuery = async (query) => {
+const runQuery = async query => {
   return await pool.query(query);
 };
 

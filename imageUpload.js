@@ -230,7 +230,7 @@ class UploadHighres extends Status {
           Key: this.Image.generateFilename(),
           ACL: "public-read",
         };
-        const options = { partSize: 5 * 1024 * 1024, queueSize: 4 };
+        const options = { partSize: 5 * 1024 * 1024, queueSize: 1 };
         const response = await s3
           .upload(params, options)
           .on("httpUploadProgress", progress => {
