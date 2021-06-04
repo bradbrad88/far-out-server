@@ -9,7 +9,7 @@ const s3 = new aws.S3({
   secretAccessKey: process.env.AWS_SECRET_KEY,
   region: process.env.REGION,
 });
-
+const THUMBNAIL_WIDTH = 1000;
 class ImageUpload {
   constructor(message, updateCallback) {
     this.status = [];
@@ -160,7 +160,7 @@ class ThumbnailBuffer extends Status {
       this.Image.sendUpdate();
       try {
         const buffer = await sharp(await this.Image.highresBuffer)
-          .resize({ width: 500 })
+          .resize({ width: THUMBNAIL_WIDTH })
           .toBuffer();
         this.complete = true;
         this.Image.sendUpdate();

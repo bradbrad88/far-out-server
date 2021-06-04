@@ -1,3 +1,14 @@
+const mapValues = data => {
+  return `(${data.map(item => item)})`;
+};
+
+const mapObject = data => {
+  return `(${data.map(item => {
+    const key = Object.keys(item);
+    return `${item[key]}`;
+  })})`;
+};
+
 exports.getUserByLocalId = user_id => {
   return {
     text: `
@@ -32,4 +43,20 @@ exports.upsertUserGoogle = user => {
       user.state,
     ],
   };
+};
+
+exports.gallery = {
+  get: () => {
+    return `SELECT a.image_id, a.display_order, b.url 
+  FROM image_gallery a join image_urls b ON a.image_id = b.image_id 
+  WHERE b.resolution = 'thumbnail'`;
+  },
+
+  delete: image_ids => {
+    return {
+      text: `DELETE FROM image_gallery
+      WHERE image_id IN ${mapValues(image_ids)};
+      ${this.gallery.get()}`,
+    };
+  },
 };

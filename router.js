@@ -6,6 +6,7 @@ const Gallery = require("./controllers/gallery");
 
 module.exports = app => {
   app.get("/gallery", Gallery.getGallery);
+  app.post("/gallery/delete", requireAuth, Gallery.deleteImage);
   app.get("/auth", requireAuth, Authentication.authenticated);
   app.post("/auth/google", Authentication.signin);
 };
