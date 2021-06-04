@@ -5,8 +5,12 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const userModel = require("../models/user");
 require("dotenv").config();
 const tokenForUser = user => {
+  console.log("user", user);
+  if (!user.admin) {
+    return null;
+  }
   const timestamp = new Date().getTime();
-  return jwt.encode({ sub: user.id, iat: timestamp }, process.env.JWT_SECRET);
+  return jwt.encode({ sub: user.user_id, iat: timestamp }, process.env.JWT_SECRET);
 };
 exports.signin = async (req, res) => {
   try {
@@ -17,7 +21,7 @@ exports.signin = async (req, res) => {
     };
     const ticket = await client.verifyIdToken(verifyOptions);
     const { payload } = ticket;
-    const user = await userModel.getUserGoogle(payload.sub);
+    // const user = await userModel.getUserGoogle(payload.sub);
     const userInput = {
       givenName: payload.given_name,
       familyName: payload.family_name,
@@ -26,11 +30,14 @@ exports.signin = async (req, res) => {
       googleId: payload.sub,
       state: {},
     };
-    const newUser = await userModel.newUserGoogle(userInput);
+    const newUser = await userModel.upsertUserGoogle(userInput);
+
     res.json({ token: tokenForUser(newUser), profile: userInput });
   } catch (error) {
     res.json({ error: error.message });
     console.log(error.message);
   }
 };
-exports.authenticated = async (req, res) => {};
+exports.authenticated = async (req, res) => {
+  res.json({ authenticated: true });
+};
