@@ -1,26 +1,89 @@
 const query = require("../db");
 const sql = require("./sql").gallery;
 
-// const sql = `SELECT a.image_id, a.display_order, b.url
-//     FROM image_gallery a join image_urls b ON a.image_id = b.image_id
-//     WHERE b.resolution = 'thumbnail'`;
-
 exports.getGallery = async () => {
   try {
     const result = await query(sql.get());
-    return result.rows;
+    const options = await query(sql.getColumnOptions());
+    return [{ imageGallery: result.rows, options: options.rows[0] }, null];
   } catch (error) {
-    return error;
+    return [null, error.message];
   }
 };
 
 exports.deleteItems = async image_ids => {
   try {
-    const result = await query(sql.delete(image_ids));
-    console.log("result:", result);
-    return result[1].rows;
+    await query(sql.delete(image_ids));
+    return [true, null];
   } catch (error) {
     console.log(error.message);
-    return { error: error.message };
+    return [null, error.message];
+  }
+};
+
+exports.getInactive = async () => {
+  try {
+    const result = await query(sql.getInactive());
+    return [result.rows, null];
+  } catch (error) {
+    console.log("Error getting inactive images from gallery:", error.message);
+    return [null, error.message];
+  }
+};
+
+exports.setComplete = async image_id => {
+  try {
+    await query(sql.setComplete(image_id));
+    return [true, null];
+  } catch (error) {
+    console.log("Error in query setting image as complete");
+    return [null, error.message];
+  }
+};
+
+exports.newImage = async (desc, user) => {
+  try {
+    const result = await query(sql.newImage(desc, user));
+    return [result.rows[0].image_id, null];
+  } catch (error) {
+    console.log("Error adding new image:", error.message);
+    return [null, error.message];
+  }
+};
+
+exports.addUrls = async data => {
+  try {
+    await query(sql.addUrls(data));
+    return [true, null];
+  } catch (error) {
+    console.log("Error adding new image urls to the database");
+    return [null, error.message];
+  }
+};
+
+exports.getAwsKeys = async (image_id, emphasize, display_order) => {
+  try {
+    const result = await query(sql.getAwsKeys());
+    return [result.rows, null];
+  } catch (error) {
+    return [null, error.message];
+  }
+};
+
+exports.setDisplay = async displayData => {
+  try {
+    await query(sql.setDisplay(displayData));
+    return [true, null];
+  } catch (error) {
+    return [null, error.message];
+  }
+};
+
+exports.getColumnOptions = async () => {
+  try {
+    const result = await query(sql.getColumnOptions());
+    return [result.rows[0], null];
+  } catch (error) {
+    return [null, error.message];
   }
 };

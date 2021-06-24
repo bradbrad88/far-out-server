@@ -2,11 +2,22 @@ const mapValues = data => {
   return `(${data.map(item => item)})`;
 };
 
-const mapObject = data => {
-  return `(${data.map(item => {
-    const key = Object.keys(item);
-    return `${item[key]}`;
-  })})`;
+const mapValueSets = data => {
+  console.log("data:", data);
+  return `${data.map(item => {
+    return `(${item.map(el => {
+      return `'${el}'`;
+    })})`.toString();
+  })}`;
+};
+
+const mapSetOfObjects = data => {
+  return `${data.map(item => {
+    return `(${Object.keys(item).map(key => {
+      return `'${item[key]}'`;
+    })})`;
+  })}`;
+  // console.log("test", test);
 };
 
 exports.getUserByLocalId = user_id => {
@@ -47,16 +58,84 @@ exports.upsertUserGoogle = user => {
 
 exports.gallery = {
   get: () => {
-    return `SELECT a.image_id, a.display_order, b.url 
-  FROM image_gallery a join image_urls b ON a.image_id = b.image_id 
-  WHERE b.resolution = 'thumbnail'`;
+    return `
+    SELECT 
+      g.image_id,
+      image_desc,
+      extract(epoch from date_uploaded) as date_uploaded,
+      likes,
+      url,
+      emphasize,
+      display_order,
+      complete
+    FROM image_gallery g INNER JOIN image_urls u ON g.image_id = u.image_id
+    INNER JOIN image_display d ON g.image_id = d.image_id
+    WHERE u.resolution = 'thumbnail'`;
   },
 
   delete: image_ids => {
     return {
       text: `DELETE FROM image_gallery
-      WHERE image_id IN ${mapValues(image_ids)};
-      ${this.gallery.get()}`,
+      WHERE image_id IN ${mapValues(image_ids)};`,
     };
+  },
+  getInactive: () => {
+    return `
+    SELECT 
+      g.image_id,
+      image_desc,
+      extract(epoch from date_uploaded) as date_uploaded,
+      url,
+      complete
+    FROM image_gallery g LEFT JOIN image_urls u ON g.image_id = u.image_id
+    LEFT JOIN image_display d ON g.image_id = d.image_id
+    WHERE (u.resolution = 'thumbnail' OR u.resolution IS NULL) AND d.image_id IS NULL
+    ORDER BY date_uploaded DESC`;
+  },
+  setDisplay: displayData => {
+    const values = mapSetOfObjects(displayData);
+    console.log("mapped values:", values);
+    const test = `
+    DELETE FROM image_display *;
+    INSERT INTO image_display (image_id, emphasize, display_order)
+    VALUES ${values}`;
+    console.log("test", test);
+    return test;
+  },
+  setComplete: image_id => {
+    return {
+      text: `
+    UPDATE image_gallery
+    SET complete = true
+    WHERE image_id = $1`,
+      values: [image_id],
+    };
+  },
+  newImage: (desc, user) => {
+    return {
+      text: `INSERT INTO image_gallery (image_desc, uploaded_by) VALUES ($1, $2) RETURNING image_id`,
+      values: [desc, user],
+    };
+  },
+  addUrls: data => {
+    const values = mapValueSets(data);
+    return `
+    INSERT INTO image_urls (image_id, url, aws_key, bucket, resolution) 
+    VALUES ${values}`;
+  },
+  getAwsKeys: () => {
+    return `
+    SELECT aws_key
+    FROM image_urls`;
+  },
+  deleteDisplay: () => {
+    return `
+    DELETE FROM image_display *`;
+  },
+  getColumnOptions: () => {
+    return `
+    SELECT
+      gallery_columns
+    FROM gallery_settings`;
   },
 };

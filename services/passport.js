@@ -14,7 +14,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, async (payload, done) => {
   try {
     const user = await userModel.getUserByLocalId(payload.sub);
     if (user?.data.admin) {
-      return done(null, user);
+      return done(null, user.data);
     }
     return done(null, false);
   } catch (error) {

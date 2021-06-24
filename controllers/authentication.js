@@ -5,7 +5,6 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const userModel = require("../models/user");
 require("dotenv").config();
 const tokenForUser = user => {
-  console.log("user", user);
   if (!user.admin) {
     return null;
   }
