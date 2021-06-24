@@ -139,3 +139,18 @@ exports.gallery = {
     FROM gallery_settings`;
   },
 };
+
+exports.blog = {
+  newBlog: blog => {
+    return {
+      text: `
+        INSERT INTO blogs (
+          title,
+          image,
+          blog_desc,
+          html)
+        VALUES ($1, $2, $3, $4)`,
+      values: [blog.title, blog.image, blog.description, blog.body],
+    };
+  },
+};
