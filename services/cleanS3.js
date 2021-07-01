@@ -22,12 +22,14 @@ const removeS3 = async () => {
       .map(key => ({
         Key: key,
       }));
+    console.log("delete keys", deleteKeys);
     const params = {
       Bucket: BUCKET,
       Delete: {
         Objects: deleteKeys,
       },
     };
+    if (deleteKeys.length < 1) return console.log("---- S3 already clean ----");
     const response = await s3.deleteObjects(params).promise();
     console.log("response", response);
   } catch (error) {

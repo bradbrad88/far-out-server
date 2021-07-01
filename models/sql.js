@@ -17,7 +17,15 @@ const mapSetOfObjects = data => {
       return `'${item[key]}'`;
     })})`;
   })}`;
-  // console.log("test", test);
+};
+
+const mapSetOfObjectsWithId = (id, data) => {
+  console.log("data", data);
+  return `${data.map(item => {
+    return `(${id}, ${Object.keys(item).map(key => {
+      return `'${item[key]}'`;
+    })})`;
+  })}`;
 };
 
 exports.getUserByLocalId = user_id => {
@@ -149,8 +157,85 @@ exports.blog = {
           image,
           blog_desc,
           html)
-        VALUES ($1, $2, $3, $4)`,
-      values: [blog.title, blog.image, blog.description, blog.body],
+        VALUES ($1, $2, $3, $4)
+        RETURNING blog_id`,
+      values: [blog.title, blog.image, blog.description, blog.html],
     };
+  },
+  editBlog: blog => {
+    return {
+      text: `
+        UPDATE blogs
+        SET 
+          title=$2,
+          html=$3,
+          image=$4,
+          blog_desc=$5
+        WHERE blog_id=$1
+      `,
+      values: [blog.blog_id, blog.title, blog.html, blog.image, blog.description],
+    };
+  },
+  getActiveBlogs: () => {
+    return `
+    SELECT
+      blog_id,
+      title,
+      date_created,
+      blog_desc,
+      t.url AS thumbnail,
+      h.url AS highres,
+      active
+    FROM blogs b  LEFT JOIN image_thumbnails t ON b.image = t.image_id
+    LEFT JOIN image_highres h ON b.image = h.image_id
+    WHERE active=true
+    ORDER BY date_created DESC`;
+  },
+  getAllBlogs: () => {
+    return `
+    SELECT
+      blog_id,
+      title,
+      date_created,
+      blog_desc,
+      t.url AS thumbnail,
+      h.url AS highres,
+      active
+    FROM blogs b  LEFT JOIN image_thumbnails t ON b.image = t.image_id
+    LEFT JOIN image_highres h ON b.image = h.image_id
+    ORDER BY date_created DESC`;
+  },
+  getBlog: blog_id => {
+    return {
+      text: `
+        SELECT *
+        FROM blogs
+        WHERE blog_id=($1)`,
+      values: [blog_id],
+    };
+  },
+  setActive: (blog_id, active) => {
+    return {
+      text: `
+      UPDATE blogs
+      SET active=$2
+      WHERE blog_id=$1`,
+      values: [blog_id, active],
+    };
+  },
+  deleteBlog: blog_id => {
+    return {
+      text: `DELETE FROM blogs
+      WHERE blog_id=$1`,
+      values: [blog_id],
+    };
+  },
+  setImageUrls: (blog_id, images) => {
+    const values = mapSetOfObjectsWithId(blog_id, images);
+    return `
+      DELETE FROM image_urls
+      WHERE blog_id=${blog_id};
+      INSERT INTO image_urls (blog_id, aws_key, url, bucket)
+      VALUES ${values}`;
   },
 };

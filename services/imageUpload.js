@@ -88,18 +88,6 @@ class ImageUpload extends EventEmitter {
     });
   }
 
-  // s3Cleanup() {
-  //   console.log("cleanup initiated");
-  //   const s3Remove = require("./cleanS3");
-  //   if (this.urlHighres?.key) {
-  //     s3Remove(this.urlHighres.key);
-  //   }
-
-  //   if (this.urlThumbnail?.key) {
-  //     s3Remove(this.urlThumbnail.key);
-  //   }
-  // }
-
   generateFilename() {
     return `${Date.now().toString()}${this.fileExtension}`;
   }
@@ -121,6 +109,7 @@ class ImageUpload extends EventEmitter {
     }
   }
 }
+
 class Status {
   constructor(Image, step) {
     this.complete = false;
@@ -157,6 +146,7 @@ class ThumbnailBuffer extends Status {
     });
   }
 }
+
 class UploadThumbnail extends Status {
   constructor(Image) {
     super(Image, "Upload Thumbnail");
@@ -198,6 +188,7 @@ class UploadThumbnail extends Status {
     });
   }
 }
+
 class UploadHighres extends Status {
   constructor(Image) {
     super(Image, "Upload Hi-res Image");
@@ -238,6 +229,7 @@ class UploadHighres extends Status {
     });
   }
 }
+
 class UpdateDB extends Status {
   constructor(Image) {
     super(Image, "Update Database");
