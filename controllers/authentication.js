@@ -20,7 +20,6 @@ exports.signin = async (req, res) => {
     };
     const ticket = await client.verifyIdToken(verifyOptions);
     const { payload } = ticket;
-    // const user = await userModel.getUserGoogle(payload.sub);
     const userInput = {
       givenName: payload.given_name,
       familyName: payload.family_name,
@@ -30,11 +29,10 @@ exports.signin = async (req, res) => {
       state: {},
     };
     const newUser = await userModel.upsertUserGoogle(userInput);
-
     res.json({ token: tokenForUser(newUser), profile: userInput });
   } catch (error) {
     res.json({ error: error.message });
-    console.log(error.message);
+    console.log("Error:", error.message);
   }
 };
 exports.authenticated = async (req, res) => {

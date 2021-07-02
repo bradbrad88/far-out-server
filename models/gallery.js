@@ -23,10 +23,20 @@ exports.deleteItems = async image_ids => {
 
 exports.getInactive = async () => {
   try {
+    await query(sql.removeStaleImages());
     const result = await query(sql.getInactive());
     return [result.rows, null];
   } catch (error) {
     console.log("Error getting inactive images from gallery:", error.message);
+    return [null, error.message];
+  }
+};
+
+exports.getAllImageThumbnails = async () => {
+  try {
+    const result = await query(sql.getAllImageThumbnails());
+    return [result.rows, null];
+  } catch (error) {
     return [null, error.message];
   }
 };

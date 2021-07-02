@@ -1,5 +1,6 @@
 const ImageUpload = require("./imageUpload");
 const { galleryWss } = require("../websocket");
+const { deleteItems } = require("../models/gallery");
 
 class ImageUploadHandler {
   constructor() {
@@ -31,10 +32,21 @@ class ImageUploadHandler {
     });
   }
 
+  imageUploadError = id => {
+    if (!id) return;
+    this.images = this.images.filter(image => image.dbId !== id);
+    deleteItems([id]);
+  };
+
+  imageUploadComplete = id => {
+    this.images = this.images.filter(image => image.dbId !== id);
+  };
+
   async newImage(image, imageData) {
     const newImage = new ImageUpload(image, imageData);
     newImage.on("update", this.onUpdate);
-
+    newImage.on("error", this.imageUploadError);
+    newImage.on("complete", this.imageUploadComplete);
     if (!newImage.valid) {
       console.log("Image sent is not valid.");
       return;

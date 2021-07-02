@@ -3,7 +3,6 @@ const mapValues = data => {
 };
 
 const mapValueSets = data => {
-  console.log("data:", data);
   return `${data.map(item => {
     return `(${item.map(el => {
       return `'${el}'`;
@@ -20,7 +19,6 @@ const mapSetOfObjects = data => {
 };
 
 const mapSetOfObjectsWithId = (id, data) => {
-  console.log("data", data);
   return `${data.map(item => {
     return `(${id}, ${Object.keys(item).map(key => {
       return `'${item[key]}'`;
@@ -100,14 +98,22 @@ exports.gallery = {
     WHERE (u.resolution = 'thumbnail' OR u.resolution IS NULL) AND d.image_id IS NULL
     ORDER BY date_uploaded DESC`;
   },
+  getAllImageThumbnails: () => {
+    return `
+    SELECT
+      g.image_id,
+      extract(epoch from date_uploaded) as date_uploaded,
+      url
+    FROM image_gallery g INNER JOIN image_urls u ON g.image_id = u.image_id
+    WHERE u.resolution = 'thumbnail' AND complete = true
+    ORDER BY date_uploaded DESC`;
+  },
   setDisplay: displayData => {
     const values = mapSetOfObjects(displayData);
-    console.log("mapped values:", values);
     const test = `
     DELETE FROM image_display *;
     INSERT INTO image_display (image_id, emphasize, display_order)
     VALUES ${values}`;
-    console.log("test", test);
     return test;
   },
   setComplete: image_id => {
@@ -145,6 +151,11 @@ exports.gallery = {
     SELECT
       gallery_columns
     FROM gallery_settings`;
+  },
+  removeStaleImages: () => {
+    return `
+    DELETE FROM image_gallery
+    WHERE complete=false AND date_uploaded < now() - INTERVAL '20 seconds'`;
   },
 };
 
@@ -208,8 +219,19 @@ exports.blog = {
   getBlog: blog_id => {
     return {
       text: `
-        SELECT *
-        FROM blogs
+        SELECT
+          blog_id,
+          title,
+          image,
+          blog_desc,
+          html,
+          extract(epoch FROM date_created) as date_created,
+          extract(epoch FROM last_modified) as last_modified,
+          active,
+          t.url as thumbnail,
+          h.url as highres
+        FROM blogs b LEFT JOIN image_thumbnails t ON b.image = t.image_id
+        LEFT JOIN image_highres h ON b.image = h.image_id 
         WHERE blog_id=($1)`,
       values: [blog_id],
     };

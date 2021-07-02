@@ -30,6 +30,14 @@ exports.getInactive = async (req, res, next) => {
   processResults(res, func, errMessage);
 };
 
+exports.getAllImageThumbnails = async (req, res, next) => {
+  const errMessage = "Error returned from database getting all image thumbnails";
+  const func = async () => {
+    return gallery.getAllImageThumbnails();
+  };
+  processResults(res, func, errMessage);
+};
+
 exports.addImage = async (req, res, next) => {
   const errMessage = "Error returned from database adding new images";
   const func = async () => {

@@ -12,6 +12,7 @@ const s3 = new aws.S3({
   region: process.env.REGION,
 });
 const THUMBNAIL_WIDTH = 1000;
+const HIGHRES_WIDTH = 4000;
 
 class ImageUpload extends EventEmitter {
   constructor(image, imageData) {
@@ -28,37 +29,38 @@ class ImageUpload extends EventEmitter {
   async getStatus() {
     const image_id = await this.dbId;
 
-    const status = this.status.map(item => {
-      return {
-        step: item.step,
-        progress: item.progress,
-        complete: item.complete,
-        inProgress: item.inProgress,
-      };
-    });
+    const status = this.status.map(item => ({
+      step: item.step,
+      progress: item.progress,
+      complete: item.complete,
+      inProgress: item.inProgress,
+      error: item.error,
+    }));
     const complete = this.status.filter(status => !status.complete).length === 0;
+    if (this.error) this.emit("error", this.dbId);
+    if (complete) this.emit("complete", this.dbId);
     return JSON.stringify({
       key: this.key,
       status: status,
       error: this.error,
       complete: complete,
-      image_id: image_id,
+      image_id: this.dbId,
       url: this.url,
     });
   }
 
   async validImage() {
-    this.dbId = new Promise(async (resolve, reject) => {
+    this.dbId = await new Promise(async (resolve, reject) => {
       try {
         const { key, user, description } = this.imageData;
         Object.assign(this, { key, user });
         const type = this.image.mimetype;
         if (!key || !type || !user) {
-          console.log("Essential data missing from image, unable to upload.");
+          console.log("Error: essential data missing from image, unable to upload.");
           return reject(null);
         }
         if (!type === "image/jpeg" && !type === "image/png") {
-          console.log("Incorrect file type: ", type);
+          console.log("Error: incorrect file type: ", type);
           return reject(null);
         }
         const dbId = await gallery.newImage(description, user.user_id);
@@ -68,7 +70,7 @@ class ImageUpload extends EventEmitter {
           reject(dbId[1]);
         }
       } catch (error) {
-        console.log("error validating image for upload: ", error.message);
+        console.log("Error validating image for upload: ", error.message);
         this.error = error.message;
         return reject(null);
       }
@@ -78,6 +80,7 @@ class ImageUpload extends EventEmitter {
   async processUpload() {
     this.status = [
       new ThumbnailBuffer(this),
+      new HighresBuffer(this),
       new UploadThumbnail(this),
       new UploadHighres(this),
       new UpdateDB(this),
@@ -95,18 +98,6 @@ class ImageUpload extends EventEmitter {
   getFileExtension() {
     if (!this.valid) return;
     return path.extname(this.image.originalname);
-  }
-
-  async retriesWrapper(func, retries) {
-    while (this.retries < retries) {
-      if (this.retries > 0) console.log("retrying");
-      try {
-        return await func();
-      } catch (error) {
-        this.retries++;
-        console.log(error.message);
-      }
-    }
   }
 }
 
@@ -141,6 +132,31 @@ class ThumbnailBuffer extends Status {
       } catch (error) {
         console.log("Error:", error.message);
         this.Image.error = "Unable to render thumbnail image";
+        this.update(() => (this.error = true));
+        reject(error.message);
+      }
+    });
+  }
+}
+
+class HighresBuffer extends Status {
+  constructor(Image) {
+    super(Image, "Generate High-res");
+  }
+
+  async init() {
+    this.Image.highresBuffer = new Promise(async (resolve, reject) => {
+      this.update(() => (this.inProgress = true));
+      try {
+        const buffer = await sharp(this.Image.image.buffer)
+          .resize({ width: HIGHRES_WIDTH })
+          .toBuffer();
+        this.update(() => (this.complete = true));
+        resolve(buffer);
+      } catch (error) {
+        console.log("Error:", error.message);
+        this.Image.error = "Unable to render highres image";
+        this.update(() => (this.error = true));
         reject(error.message);
       }
     });
@@ -156,6 +172,7 @@ class UploadThumbnail extends Status {
       try {
         this.update(() => (this.inProgress = true));
         const body = await this.Image.thumbnailBuffer;
+
         const params = {
           Body: body,
           Bucket: BUCKET,
@@ -183,6 +200,7 @@ class UploadThumbnail extends Status {
       } catch (error) {
         console.log("Error:", error.message);
         this.Image.error = "Unable to upload thumbnail.";
+        this.update(() => (this.error = true));
         reject(error.message);
       }
     });
@@ -197,7 +215,7 @@ class UploadHighres extends Status {
     this.Image.urls.highres = new Promise(async (resolve, reject) => {
       try {
         this.update(() => (this.inProgress = true));
-        const body = this.Image.image.buffer;
+        const body = await this.Image.highresBuffer;
         const params = {
           Body: body,
           Bucket: BUCKET,
@@ -224,6 +242,7 @@ class UploadHighres extends Status {
       } catch (error) {
         console.log("Error:", error.message);
         this.Image.error = "Unable to upload thumbnail.";
+        this.update(() => (this.error = true));
         reject(error.message);
       }
     });
@@ -242,18 +261,12 @@ class UpdateDB extends Status {
       const data = urls.map(url => {
         return [image_id, url.location, url.key, url.bucket, url.resolution];
       });
-      // const urlQuery = `INSERT INTO image_urls (image_id, url, aws_key, bucket, resolution) VALUES ${this.queryPrep(
-      //   data
-      // )}`;
       const urlResult = await gallery.addUrls(data);
       const completeResult = await gallery.setComplete(image_id);
-      console.log("URL result:", urlResult);
-      console.log("Complete result:", completeResult);
-      // await query(urlQuery);
-
       this.update(() => (this.complete = true));
     } catch (error) {
       this.Image.error = "Error updating database.";
+      this.update(() => (this.error = true));
       console.log("Error:", error.message);
     }
   }

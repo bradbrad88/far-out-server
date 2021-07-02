@@ -5,6 +5,6 @@ const galleryWss = new WebSocket.Server({
   verifyClient: verifyClient,
   path: "/gallery",
 });
-console.log("webserver running on", 3001);
+console.log("Webserver running on", 3001);
 
 module.exports.galleryWss = galleryWss;

@@ -11,6 +11,7 @@ const Blog = require("./controllers/blog");
 module.exports = app => {
   app.get("/gallery", Gallery.getGallery);
   app.get("/gallery/inactive", requireAuth, Gallery.getInactive);
+  app.get("/gallery/all_thumbnails", Gallery.getAllImageThumbnails);
   app.post("/gallery/delete", requireAuth, Gallery.deleteImage);
   app.post("/gallery/insert", requireAuth, upload.single("image"), Gallery.addImage);
   app.post("/gallery/display", requireAuth, Gallery.setDisplay);

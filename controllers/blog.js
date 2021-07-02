@@ -18,7 +18,6 @@ exports.editBlog = async (req, res, next) => {
 };
 
 exports.getActiveBlogs = async (req, res, next) => {
-  console.log("getting active blogs");
   const errMessage = "Error returned from database when getting active blogs";
   const func = async () => {
     return await blog.getActiveBlogs();
@@ -27,7 +26,6 @@ exports.getActiveBlogs = async (req, res, next) => {
 };
 
 exports.getAllBlogs = async (req, res, next) => {
-  console.log("getting all blogs");
   const errMessage = "Error returned from database when getting active blogs";
   const func = async () => {
     return await blog.getAllBlogs();
@@ -51,7 +49,6 @@ exports.uploadImage = async (req, res, next) => {
 exports.setActive = async (req, res, next) => {
   const errMessage =
     "Error returned from database when setting active property on blog post";
-  console.log("req.body", req.body);
   const func = async () => {
     return await blog.setActive(req.body.blog_id, req.body.active);
   };
@@ -69,7 +66,6 @@ exports.deleteBlog = async (req, res, next) => {
 exports.setImageUrls = async (req, res, next) => {
   const errMessage =
     "Error returned from database when setting image urls for blog post";
-  console.log("req body", req.body);
   const func = async () => {
     return await blog.setImageUrls(req.params.blog_id, req.body);
   };
