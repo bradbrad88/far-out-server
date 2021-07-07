@@ -312,4 +312,20 @@ exports.comments = {
       comment.parent_id,
     ],
   }),
+  getImage: image_id => ({
+    text: `
+      SELECT 
+        comment_id,
+        image_id,
+        c.user_id,
+        u.given_name,
+        u.family_name,
+        u.image_url,
+        comment_body,
+        EXTRACT(epoch from date_created) as date_created,
+        parent_id
+      FROM user_comments c LEFT JOIN users u ON c.user_id=u.user_id
+      WHERE image_id=$1`,
+    values: [image_id],
+  }),
 };

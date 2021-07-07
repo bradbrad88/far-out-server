@@ -36,4 +36,6 @@ module.exports = app => {
     Blog.uploadImage
   );
   app.post("/comment/new", requireUser, Comment.newComment);
+  app.get("/comment/image/:image_id", Comment.getComments);
+  app.get("/comment/blog/:blog_id", Comment.getComments);
 };

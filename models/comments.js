@@ -9,3 +9,12 @@ exports.newComment = async (user, comment) => {
     return [null, error.message];
   }
 };
+
+exports.getImage = async image_id => {
+  try {
+    const result = await query(sql.getImage(image_id));
+    return [result.rows, null];
+  } catch (error) {
+    return [null, error.message];
+  }
+};

@@ -8,3 +8,14 @@ exports.newComment = async (req, res, next) => {
   };
   process(res, func, errMessage);
 };
+
+exports.getComments = async (req, res, next) => {
+  console.log("get comments");
+  errMessage = "Error returned from database when getting comments";
+  const func = async () => {
+    const [image, blog] = [req.params.image_id, req.params.blog_id];
+    if (image) return await comments.getImage(image);
+    if (blog) return await comments.getBlog(blog);
+  };
+  process(res, func, errMessage);
+};
