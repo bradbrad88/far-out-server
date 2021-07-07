@@ -301,8 +301,15 @@ exports.blog = {
 exports.comments = {
   newComment: (user, comment) => ({
     text: `
-      INSERT INTO user_comments (user_id, blog_id, image_id, comment_body)
-      VALUES ($1, $2, $3, $4)`,
-    values: [user.user_id, comment.blog_id, comment.image_id, comment.body],
+      INSERT INTO user_comments (user_id, blog_id, image_id, comment_body, parent_id)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING comment_id`,
+    values: [
+      user.user_id,
+      comment.blog_id,
+      comment.image_id,
+      comment.body,
+      comment.parent_id,
+    ],
   }),
 };
