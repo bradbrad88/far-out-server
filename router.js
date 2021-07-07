@@ -5,6 +5,7 @@ const { requireUser, requireAdmin } = require("./services/authorization");
 const Authentication = require("./controllers/authentication");
 const Gallery = require("./controllers/gallery");
 const Blog = require("./controllers/blog");
+const Comment = require("./controllers/comments");
 
 module.exports = app => {
   app.get("/gallery", Gallery.getGallery);
@@ -34,5 +35,5 @@ module.exports = app => {
     requireAdmin,
     Blog.uploadImage
   );
-  app.post("/comment/new", requireUser);
+  app.post("/comment/new", requireUser, Comment.newComment);
 };
