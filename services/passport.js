@@ -14,7 +14,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, async (payload, done) => {
     const [user, error] = await userModel.getUserByLocalId(payload.sub);
     if (error) return done(error, false);
     if (user) {
-      return done(null, user.data);
+      return done(null, user);
     }
     return done(null, false);
   } catch (error) {
