@@ -1,3 +1,4 @@
+const process = require("../services/controllerProcessing");
 const gallery = require("../models/gallery");
 const cleanS3 = require("../services/cleanS3");
 const ImageUploadHandler = require("../services/imageUploadHandler");
@@ -8,7 +9,7 @@ exports.getGallery = async (req, res, next) => {
   const func = async () => {
     return await gallery.getGallery();
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.deleteImage = async (req, res, next) => {
@@ -19,7 +20,7 @@ exports.deleteImage = async (req, res, next) => {
     cleanS3();
     return await gallery.getInactive();
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.getInactive = async (req, res, next) => {
@@ -27,7 +28,7 @@ exports.getInactive = async (req, res, next) => {
   const func = async () => {
     return gallery.getInactive();
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.getAllImageThumbnails = async (req, res, next) => {
@@ -35,7 +36,7 @@ exports.getAllImageThumbnails = async (req, res, next) => {
   const func = async () => {
     return gallery.getAllImageThumbnails();
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.addImage = async (req, res, next) => {
@@ -44,7 +45,7 @@ exports.addImage = async (req, res, next) => {
     req.body.user = req.user;
     return await UploadHandler.newImage(req.file, req.body);
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.setDisplay = async (req, res) => {
@@ -52,15 +53,5 @@ exports.setDisplay = async (req, res) => {
   const func = async () => {
     return await gallery.setDisplay(req.body);
   };
-  processResults(res, func, errMessage);
-};
-
-const processResults = async (res, func, errMessage) => {
-  try {
-    const result = await func();
-    if (result[0]) return res.json({ data: result[0] });
-    res.json({ error: errMessage });
-  } catch (error) {
-    res.send({ error: `${errMessage}: ${error.message}` });
-  }
+  process(res, func, errMessage);
 };

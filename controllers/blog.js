@@ -1,3 +1,4 @@
+const process = require("../services/controllerProcessing");
 const blog = require("../models/blog");
 const { imageHandler } = require("../services/blogImageHandler");
 
@@ -6,7 +7,7 @@ exports.newBlog = async (req, res, next) => {
   const func = async () => {
     return await blog.newBlog(req.body);
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.editBlog = async (req, res, next) => {
@@ -14,7 +15,7 @@ exports.editBlog = async (req, res, next) => {
   const func = async () => {
     return await blog.editBlog(req.body);
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.getActiveBlogs = async (req, res, next) => {
@@ -22,7 +23,7 @@ exports.getActiveBlogs = async (req, res, next) => {
   const func = async () => {
     return await blog.getActiveBlogs();
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.getAllBlogs = async (req, res, next) => {
@@ -30,7 +31,7 @@ exports.getAllBlogs = async (req, res, next) => {
   const func = async () => {
     return await blog.getAllBlogs();
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.getBlog = async (req, res, next) => {
@@ -38,7 +39,7 @@ exports.getBlog = async (req, res, next) => {
   const func = async () => {
     return await blog.getBlog(req.params.blog_id);
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.uploadImage = async (req, res, next) => {
@@ -52,7 +53,7 @@ exports.setActive = async (req, res, next) => {
   const func = async () => {
     return await blog.setActive(req.body.blog_id, req.body.active);
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.deleteBlog = async (req, res, next) => {
@@ -60,7 +61,7 @@ exports.deleteBlog = async (req, res, next) => {
   const func = async () => {
     return await blog.deleteBlog(req.params.blog_id);
   };
-  processResults(res, func, errMessage);
+  process(res, func, errMessage);
 };
 
 exports.setImageUrls = async (req, res, next) => {
@@ -69,15 +70,5 @@ exports.setImageUrls = async (req, res, next) => {
   const func = async () => {
     return await blog.setImageUrls(req.params.blog_id, req.body);
   };
-  processResults(res, func, errMessage);
-};
-
-const processResults = async (res, func, errMessage) => {
-  try {
-    const result = await func();
-    if (result[0]) return res.json({ data: result[0] });
-    res.json({ error: errMessage });
-  } catch (error) {
-    res.send({ error: `${errMessage}: ${error.message}` });
-  }
+  process(res, func, errMessage);
 };
