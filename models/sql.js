@@ -308,7 +308,7 @@ exports.comments = {
       user.user_id,
       comment.blog_id,
       comment.image_id,
-      comment.body,
+      comment.comment_body,
       comment.parent_id,
     ],
   }),
