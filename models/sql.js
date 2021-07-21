@@ -25,6 +25,7 @@ const mapSetOfObjectsWithId = (id, data) => {
     })})`;
   })}`;
 };
+
 exports.user = {
   getUserByLocalId: user_id => {
     return {
@@ -62,42 +63,6 @@ exports.user = {
   },
 };
 
-// exports.getUserByLocalId = user_id => {
-//   return {
-//     text: `
-//     SELECT
-//       user_id
-//     , given_name
-//     , family_name
-//     , email
-//     , image_url
-//     , admin
-//     FROM users
-//     WHERE user_id = $1`,
-//     values: [user_id],
-//   };
-// };
-
-// exports.upsertUserGoogle = user => {
-//   return {
-//     text: `
-//       INSERT INTO users
-//       (given_name, family_name, email, image_url, google_id, user_state)
-//       VALUES ($1, $2, $3, $4, $5, $6)
-//       ON CONFLICT (google_id)
-//         DO UPDATE SET google_id=users.google_id, given_name=EXCLUDED.given_name, family_name=EXCLUDED.family_name, email=EXCLUDED.email, image_url=EXCLUDED.image_url, user_state=EXCLUDED.user_state
-//       RETURNING user_id, given_name, family_name, email, image_url, google_id, admin`,
-//     values: [
-//       user.givenName,
-//       user.familyName,
-//       user.email,
-//       user.imageUrl,
-//       user.googleId,
-//       user.state,
-//     ],
-//   };
-// };
-
 exports.gallery = {
   get: () => {
     return `
@@ -106,13 +71,14 @@ exports.gallery = {
       image_desc,
       extract(epoch from date_uploaded) as date_uploaded,
       likes,
-      url,
+      h.url as highres,
+      t.url as thumbnail,
       emphasize,
       display_order,
       complete
-    FROM image_gallery g INNER JOIN image_urls u ON g.image_id = u.image_id
-    INNER JOIN image_display d ON g.image_id = d.image_id
-    WHERE u.resolution = 'thumbnail'`;
+    FROM image_gallery g LEFT JOIN image_thumbnails t ON g.image_id = t.image_id
+    LEFT JOIN image_highres h on g.image_id = h.image_id
+    INNER JOIN image_display d ON g.image_id = d.image_id`;
   },
 
   delete: image_ids => {
