@@ -16,9 +16,9 @@ exports.deleteImage = async (req, res, next) => {
   const errMessage = "Error returned from database deleting image(s)";
   const func = async () => {
     const images = req.body;
-    await gallery.deleteItems(images);
+    const res = await gallery.deleteItems(images);
     cleanS3();
-    return await gallery.getInactive();
+    return res;
   };
   process(res, func, errMessage);
 };

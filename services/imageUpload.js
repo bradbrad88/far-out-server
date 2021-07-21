@@ -24,6 +24,7 @@ class ImageUpload extends EventEmitter {
     this.urls = {};
     this.valid = this.validImage();
     this.fileExtension = this.getFileExtension();
+    this.dbId = new Promise(this.getDbId);
   }
 
   async getStatus() {
@@ -37,45 +38,46 @@ class ImageUpload extends EventEmitter {
       error: item.error,
     }));
     const complete = this.status.filter(status => !status.complete).length === 0;
-    if (this.error) this.emit("error", this.dbId);
-    if (complete) this.emit("complete", this.dbId);
+    if (this.error) this.emit("error", image_id);
+    if (complete) this.emit("complete", image_id);
     return JSON.stringify({
       key: this.key,
       status: status,
       error: this.error,
       complete: complete,
-      image_id: this.dbId,
+      image_id: image_id,
       url: this.url,
     });
   }
 
-  async validImage() {
-    this.dbId = await new Promise(async (resolve, reject) => {
-      try {
-        const { key, user, description } = this.imageData;
-        Object.assign(this, { key, user });
-        const type = this.image.mimetype;
-        if (!key || !type || !user) {
-          console.log("Error: essential data missing from image, unable to upload.");
-          return reject(null);
-        }
-        if (!type === "image/jpeg" && !type === "image/png") {
-          console.log("Error: incorrect file type: ", type);
-          return reject(null);
-        }
-        const dbId = await gallery.newImage(description, user.user_id);
-        if (dbId[0]) {
-          resolve(dbId[0]);
-        } else {
-          reject(dbId[1]);
-        }
-      } catch (error) {
-        console.log("Error validating image for upload: ", error.message);
-        this.error = error.message;
+  async validImage() {}
+
+  getDbId = async (resolve, reject) => {
+    try {
+      const { key, user, description } = this.imageData;
+      Object.assign(this, { key, user });
+      const type = this.image.mimetype;
+      if (!key || !type || !user) {
+        console.log("Error: essential data missing from image, unable to upload.");
         return reject(null);
       }
-    });
-  }
+      if (!type === "image/jpeg" && !type === "image/png") {
+        console.log("Error: incorrect file type: ", type);
+        return reject(null);
+      }
+      const dbId = await gallery.newImage(description, user.user_id);
+      console.log("dbid", dbId);
+      if (dbId[0]) {
+        resolve(dbId[0]);
+      } else {
+        reject(dbId[1]);
+      }
+    } catch (error) {
+      console.log("Error validating image for upload: ", error.message);
+      this.error = error.message;
+      return reject(null);
+    }
+  };
 
   async processUpload() {
     this.status = [

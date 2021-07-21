@@ -87,19 +87,24 @@ exports.gallery = {
       WHERE image_id IN ${mapValues(image_ids)};`,
     };
   },
+
   getInactive: () => {
     return `
     SELECT 
       g.image_id,
       image_desc,
       extract(epoch from date_uploaded) as date_uploaded,
-      url,
+      t.url as thumbnail,
+      h.url as highres,
       complete
-    FROM image_gallery g LEFT JOIN image_urls u ON g.image_id = u.image_id
+    FROM image_gallery g 
+    LEFT JOIN image_thumbnails t ON g.image_id = t.image_id
+    LEFT JOIN image_highres h on g.image_id = h.image_id
     LEFT JOIN image_display d ON g.image_id = d.image_id
-    WHERE (u.resolution = 'thumbnail' OR u.resolution IS NULL) AND d.image_id IS NULL
+    WHERE d.image_id IS NULL
     ORDER BY date_uploaded DESC`;
   },
+
   getAllImageThumbnails: () => {
     return `
     SELECT
@@ -110,6 +115,7 @@ exports.gallery = {
     WHERE u.resolution = 'thumbnail' AND complete = true
     ORDER BY date_uploaded DESC`;
   },
+
   setDisplay: displayData => {
     const values = mapSetOfObjects(displayData);
     const test = `
@@ -118,6 +124,7 @@ exports.gallery = {
     VALUES ${values}`;
     return test;
   },
+
   setComplete: image_id => {
     return {
       text: `
@@ -127,33 +134,39 @@ exports.gallery = {
       values: [image_id],
     };
   },
+
   newImage: (desc, user) => {
     return {
       text: `INSERT INTO image_gallery (image_desc, uploaded_by) VALUES ($1, $2) RETURNING image_id`,
       values: [desc, user],
     };
   },
+
   addUrls: data => {
     const values = mapValueSets(data);
     return `
     INSERT INTO image_urls (image_id, url, aws_key, bucket, resolution) 
     VALUES ${values}`;
   },
+
   getAwsKeys: () => {
     return `
     SELECT aws_key
     FROM image_urls`;
   },
+
   deleteDisplay: () => {
     return `
     DELETE FROM image_display *`;
   },
+
   getColumnOptions: () => {
     return `
     SELECT
       gallery_columns
     FROM gallery_settings`;
   },
+
   removeStaleImages: () => {
     return `
     DELETE FROM image_gallery

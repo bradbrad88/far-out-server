@@ -28,7 +28,8 @@ class ImageUploadHandler {
 
   getStatus(client) {
     this.images.forEach(async image => {
-      client.send(await image.getStatus());
+      const status = await image.getStatus();
+      client.send(status);
     });
   }
 
@@ -43,14 +44,15 @@ class ImageUploadHandler {
   };
 
   async newImage(image, imageData) {
+    console.log("new image:", imageData);
     const newImage = new ImageUpload(image, imageData);
     newImage.on("update", this.onUpdate);
     newImage.on("error", this.imageUploadError);
     newImage.on("complete", this.imageUploadComplete);
-    if (!newImage.valid) {
-      console.log("Image sent is not valid.");
-      return;
-    }
+    // if (!newImage.valid) {
+    //   console.log("Image sent is not valid.");
+    //   return;
+    // }
 
     if (this.images.some(image => image.key === newImage.key)) {
       console.log("This image is already being processed, disregarding.");
@@ -60,6 +62,7 @@ class ImageUploadHandler {
     this.images.push(newImage);
     newImage.processUpload();
     const image_id = await newImage.dbId;
+    console.log("image id", image_id);
     if (image_id) return [image_id, null];
     return [null, "Error getting image_id"];
   }
