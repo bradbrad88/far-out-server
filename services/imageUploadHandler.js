@@ -44,7 +44,6 @@ class ImageUploadHandler {
   };
 
   async newImage(image, imageData) {
-    console.log("new image:", imageData);
     const newImage = new ImageUpload(image, imageData);
     newImage.on("update", this.onUpdate);
     newImage.on("error", this.imageUploadError);
@@ -62,7 +61,6 @@ class ImageUploadHandler {
     this.images.push(newImage);
     newImage.processUpload();
     const image_id = await newImage.dbId;
-    console.log("image id", image_id);
     if (image_id) return [image_id, null];
     return [null, "Error getting image_id"];
   }

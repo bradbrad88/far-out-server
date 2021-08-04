@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "nodemon index.js ",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "migrate": "npx sequelize-cli db:migrate",
+    "createdb": "npx sequelize db:create",
+    "setup": "node setup.js"
   },
   "keywords": [],
   "author": "",
@@ -25,7 +28,13 @@
     "passport-google-oauth": "^2.0.0",
     "passport-jwt": "^4.0.0",
     "pg": "^8.6.0",
+    "pg-hstore": "^2.3.4",
+    "prompt": "^1.1.0",
+    "sequelize": "^6.6.5",
     "sharp": "^0.28.2",
     "ws": "^7.4.5"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.2.0"
   }
 }
