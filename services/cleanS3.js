@@ -12,6 +12,7 @@ const removeS3 = async () => {
   try {
     console.log("---- cleaning s3 ----");
     let currentKeys = await gallery.getAwsKeys();
+    if (currentKeys.length < 1) return console.log("---- S3 clean aborted ----");
     currentKeys = currentKeys[0].map(key => key.aws_key);
     const res = await s3.listObjectsV2({ Bucket: BUCKET }).promise();
     const awsKeys = res.Contents.map(awsObj => awsObj.Key);
@@ -30,6 +31,7 @@ const removeS3 = async () => {
     };
     if (deleteKeys.length < 1) return console.log("---- S3 already clean ----");
     const response = await s3.deleteObjects(params).promise();
+    console.log("---- S3 cleaned ----");
   } catch (error) {
     console.log(error);
   }
