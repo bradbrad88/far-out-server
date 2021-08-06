@@ -22,7 +22,7 @@ exports.signin = async (req, res) => {
     if (error) {
       res.status(500).json({ error });
     }
-    res.json({ token: tokenForUser(user), profile: user });
+    res.json({ token: tokenForUser(user), profile: user, method: "google" });
   } catch (error) {
     res.json({ error: error.message });
     console.log("Error:", error.message);
