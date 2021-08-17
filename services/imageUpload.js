@@ -66,7 +66,6 @@ class ImageUpload extends EventEmitter {
         return reject(null);
       }
       const dbId = await gallery.newImage(description, user.user_id);
-      console.log("dbid", dbId);
       if (dbId[0]) {
         resolve(dbId[0]);
       } else {

@@ -10,7 +10,7 @@ const Comment = require("./controllers/comments");
 module.exports = app => {
   app.get("/gallery", Gallery.getGallery);
   app.get("/gallery/inactive", requireAdmin, Gallery.getInactive);
-  app.get("/gallery/all_thumbnails", Gallery.getAllImageThumbnails);
+  app.get("/gallery/all", requireAdmin, Gallery.getAll);
   app.post("/gallery/delete", requireAdmin, Gallery.deleteImage);
   app.post(
     "/gallery/insert",

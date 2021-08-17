@@ -64,6 +64,7 @@ exports.user = {
 };
 
 exports.gallery = {
+  // get active images only
   get: () => {
     return `
     SELECT 
@@ -73,12 +74,36 @@ exports.gallery = {
       likes,
       h.url as highres,
       t.url as thumbnail,
-      emphasize,
-      display_order,
+      i,
+      x,
+      y,
+      w,
+      h,
+      img_pos,
       complete
     FROM image_gallery g LEFT JOIN image_thumbnails t ON g.image_id = t.image_id
     LEFT JOIN image_highres h on g.image_id = h.image_id
-    INNER JOIN image_display d ON g.image_id = d.image_id`;
+    INNER JOIN image_display d ON g.image_id = d.i`;
+  },
+
+  // get all images (active and banked)
+  getAll: () => {
+    return `
+    SELECT
+      g.image_id,
+      image_desc,
+      extract(epoch from date_uploaded) as date_uploaded,
+      likes,
+      t.url as thumbnail,
+      i,
+      x,
+      y,
+      w,
+      h,
+      img_pos,
+      complete
+    FROM image_gallery g LEFT JOIN image_thumbnails t ON g.image_id = t.image_id
+    LEFT JOIN image_display d ON g.image_id = d.i`;
   },
 
   delete: image_ids => {
@@ -88,6 +113,7 @@ exports.gallery = {
     };
   },
 
+  // broken - redundant
   getInactive: () => {
     return `
     SELECT 
@@ -120,8 +146,9 @@ exports.gallery = {
     const values = mapSetOfObjects(displayData);
     const test = `
     DELETE FROM image_display *;
-    INSERT INTO image_display (image_id, emphasize, display_order)
+    INSERT INTO image_display (i, x, y, w, h, img_pos)
     VALUES ${values}`;
+    console.log(test);
     return test;
   },
 

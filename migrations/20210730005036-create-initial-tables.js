@@ -60,6 +60,7 @@ module.exports = {
     TABLESPACE pg_default;
     ALTER TABLE public.blogs
         OWNER to postgres;
+
     -- Table: public.gallery_settings
     -- DROP TABLE public.gallery_settings;
     CREATE TABLE IF NOT EXISTS public.gallery_settings
@@ -70,18 +71,19 @@ module.exports = {
         CONSTRAINT gallery_settings_single_row_key UNIQUE (single_row),
         CONSTRAINT gallery_settings_single_row_check CHECK (single_row = false)
     )
-    
     TABLESPACE pg_default;
     ALTER TABLE public.gallery_settings
         OWNER to postgres;
+
     -- Table: public.image_display
     -- DROP TABLE public.image_display;
     CREATE TABLE IF NOT EXISTS public.image_display
     (
         image_id integer,
-        emphasize integer DEFAULT 1,
-        display_order integer NOT NULL,
-        CONSTRAINT image_display_display_order_key UNIQUE (display_order),
+        x integer,
+        y integer,
+        w integer,
+        h integer,
         CONSTRAINT image_display_image_id_fkey FOREIGN KEY (image_id)
             REFERENCES public.image_gallery (image_id) MATCH SIMPLE
             ON UPDATE NO ACTION
@@ -115,6 +117,7 @@ module.exports = {
     TABLESPACE pg_default;
     ALTER TABLE public.image_urls
         OWNER to postgres;
+
     -- Table: public.user_comments
     -- DROP TABLE public.user_comments;
     CREATE TABLE IF NOT EXISTS public.user_comments
@@ -146,26 +149,30 @@ module.exports = {
     TABLESPACE pg_default;
     ALTER TABLE public.user_comments
         OWNER to postgres;
+        
+    CREATE OR REPLACE VIEW public.image_highres
+    AS
+    SELECT g.image_id,
+        u.url
+        FROM image_gallery g
+        JOIN image_urls u ON g.image_id = u.image_id
+        WHERE u.resolution::text = 'highres'::text;
     
-    -- Table: public.users
-    -- DROP TABLE public.users;
-    CREATE TABLE IF NOT EXISTS public.users
-    (
-        user_id integer NOT NULL DEFAULT nextval('users_user_id_seq'::regclass),
-        given_name character varying(255) COLLATE pg_catalog."default",
-        family_name character varying(255) COLLATE pg_catalog."default",
-        email character varying(255) COLLATE pg_catalog."default",
-        image_url character varying(255) COLLATE pg_catalog."default",
-        google_id character varying(255) COLLATE pg_catalog."default",
-        user_state json,
-        admin boolean DEFAULT false,
-        CONSTRAINT users_pkey PRIMARY KEY (user_id),
-        CONSTRAINT users_email_key UNIQUE (email),
-        CONSTRAINT users_google_id_key UNIQUE (google_id)
-    )
-    TABLESPACE pg_default;
-    ALTER TABLE public.users
-        OWNER to postgres;`);
+    ALTER TABLE public.image_highres
+        OWNER TO postgres;
+    
+    CREATE OR REPLACE VIEW public.image_thumbnails
+    AS
+    SELECT g.image_id,
+        u.url
+        FROM image_gallery g
+        JOIN image_urls u ON g.image_id = u.image_id
+        WHERE u.resolution::text = 'thumbnail'::text;
+    
+    ALTER TABLE public.image_thumbnails
+        OWNER TO postgres;
+
+        `);
   },
 
   down: async (queryInterface, Sequelize) => {

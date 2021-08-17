@@ -31,10 +31,10 @@ exports.getInactive = async (req, res, next) => {
   process(res, func, errMessage);
 };
 
-exports.getAllImageThumbnails = async (req, res, next) => {
+exports.getAll = async (req, res, next) => {
   const errMessage = "Error returned from database getting all image thumbnails";
   const func = async () => {
-    return gallery.getAllImageThumbnails();
+    return gallery.getAll();
   };
   process(res, func, errMessage);
 };

@@ -32,9 +32,9 @@ exports.getInactive = async () => {
   }
 };
 
-exports.getAllImageThumbnails = async () => {
+exports.getAll = async () => {
   try {
-    const result = await query(sql.getAllImageThumbnails());
+    const result = await query(sql.getAll());
     return [result.rows, null];
   } catch (error) {
     return [null, error.message];
@@ -85,6 +85,7 @@ exports.setDisplay = async displayData => {
     await query(sql.setDisplay(displayData));
     return [true, null];
   } catch (error) {
+    console.log(error);
     return [null, error.message];
   }
 };
