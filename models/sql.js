@@ -79,7 +79,7 @@ exports.gallery = {
       y,
       w,
       h,
-      img_pos,
+      position,
       complete
     FROM image_gallery g LEFT JOIN image_thumbnails t ON g.image_id = t.image_id
     LEFT JOIN image_highres h on g.image_id = h.image_id
@@ -100,8 +100,9 @@ exports.gallery = {
       y,
       w,
       h,
-      img_pos,
-      complete
+      position,
+      complete,
+      aspect_ratio
     FROM image_gallery g LEFT JOIN image_thumbnails t ON g.image_id = t.image_id
     LEFT JOIN image_display d ON g.image_id = d.i`;
   },
@@ -144,21 +145,21 @@ exports.gallery = {
 
   setDisplay: displayData => {
     const values = mapSetOfObjects(displayData);
-    const test = `
+    const query = `
     DELETE FROM image_display *;
-    INSERT INTO image_display (i, x, y, w, h, img_pos)
+    INSERT INTO image_display (i, x, y, w, h, position)
     VALUES ${values}`;
-    console.log(test);
-    return test;
+    console.log(query);
+    return query;
   },
 
-  setComplete: image_id => {
+  setComplete: (image_id, aspectRatio) => {
     return {
       text: `
     UPDATE image_gallery
-    SET complete = true
+    SET complete = true, aspect_ratio = $2
     WHERE image_id = $1`,
-      values: [image_id],
+      values: [image_id, aspectRatio],
     };
   },
 

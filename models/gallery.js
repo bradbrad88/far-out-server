@@ -37,13 +37,13 @@ exports.getAll = async () => {
     const result = await query(sql.getAll());
     return [result.rows, null];
   } catch (error) {
-    return [null, error.message];
+    return [null, error];
   }
 };
 
-exports.setComplete = async image_id => {
+exports.setComplete = async (image_id, aspectRatio) => {
   try {
-    await query(sql.setComplete(image_id));
+    await query(sql.setComplete(image_id, aspectRatio));
     return [true, null];
   } catch (error) {
     console.log("Error in query setting image as complete");

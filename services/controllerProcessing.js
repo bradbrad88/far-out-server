@@ -1,11 +1,12 @@
 module.exports = async (res, func, errMessage) => {
   try {
     const result = await func();
+    console.log(result);
     if (result[0]) return res.json({ data: result[0] });
     console.log(errMessage);
-    res.json({ error: errMessage });
+    res.status(500).json({ error: result[1] });
   } catch (error) {
     console.log("Error:", error);
-    res.json({ error: `${errMessage}: ${error.message}` });
+    res.status(500).json({ error: `${errMessage}: ${error.message}` });
   }
 };

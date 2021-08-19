@@ -25,11 +25,12 @@ class ImageUpload extends EventEmitter {
     this.valid = this.validImage();
     this.fileExtension = this.getFileExtension();
     this.dbId = new Promise(this.getDbId);
+    this.aspectRatio = new Promise(this.getAspectRatio);
   }
 
   async getStatus() {
     const image_id = await this.dbId;
-
+    const aspect_ratio = await this.aspectRatio;
     const status = this.status.map(item => ({
       step: item.step,
       progress: item.progress,
@@ -47,6 +48,7 @@ class ImageUpload extends EventEmitter {
       complete: complete,
       image_id: image_id,
       url: this.url,
+      aspect_ratio,
     });
   }
 
@@ -75,6 +77,16 @@ class ImageUpload extends EventEmitter {
       console.log("Error validating image for upload: ", error.message);
       this.error = error.message;
       return reject(null);
+    }
+  };
+
+  getAspectRatio = async (resolve, reject) => {
+    try {
+      const { width, height } = await sharp(this.image.buffer).metadata();
+      const aspectRatio = width / height;
+      resolve(aspectRatio);
+    } catch (error) {
+      reject(error);
     }
   };
 
@@ -258,12 +270,14 @@ class UpdateDB extends Status {
     try {
       const urls = await Promise.all(Object.values(this.Image.urls));
       const image_id = await Promise.resolve(this.Image.dbId);
+      const aspectRatio = await this.Image.aspectRatio;
+      console.log(aspectRatio);
       this.update(() => (this.inProgress = true));
       const data = urls.map(url => {
         return [image_id, url.location, url.key, url.bucket, url.resolution];
       });
       const urlResult = await gallery.addUrls(data);
-      const completeResult = await gallery.setComplete(image_id);
+      const completeResult = await gallery.setComplete(image_id, aspectRatio);
       this.update(() => (this.complete = true));
     } catch (error) {
       this.Image.error = "Error updating database.";
