@@ -8,6 +8,9 @@ const Blog = require("./controllers/blog");
 const Comment = require("./controllers/comments");
 
 module.exports = app => {
+  app.get("/test", (req, res) => {
+    res.json({ success: true });
+  });
   app.get("/gallery", Gallery.getGallery);
   // app.get("/gallery/inactive", requireAdmin, Gallery.getInactive);
   app.get("/gallery/all", requireAdmin, Gallery.getAll);
