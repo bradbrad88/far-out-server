@@ -1,4 +1,5 @@
 "use strict";
+require("dotenv").config();
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     return queryInterface.sequelize.query(`
@@ -19,7 +20,7 @@ module.exports = {
     )
     TABLESPACE pg_default;
     ALTER TABLE public.users
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
     
     -- Table: public.image_gallery
     -- DROP TABLE public.image_gallery;
@@ -38,7 +39,7 @@ module.exports = {
     )
     TABLESPACE pg_default;
     ALTER TABLE public.image_gallery
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
 
     -- Table: public.blogs
     -- DROP TABLE public.blogs;
@@ -59,7 +60,7 @@ module.exports = {
     )
     TABLESPACE pg_default;
     ALTER TABLE public.blogs
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
 
     -- Table: public.gallery_settings
     -- DROP TABLE public.gallery_settings;
@@ -73,7 +74,7 @@ module.exports = {
     )
     TABLESPACE pg_default;
     ALTER TABLE public.gallery_settings
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
 
     -- Table: public.image_display
     -- DROP TABLE public.image_display;
@@ -91,7 +92,7 @@ module.exports = {
     )
     TABLESPACE pg_default;
     ALTER TABLE public.image_display
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
 
     -- Table: public.image_urls
     -- DROP TABLE public.image_urls;
@@ -116,7 +117,7 @@ module.exports = {
     
     TABLESPACE pg_default;
     ALTER TABLE public.image_urls
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
 
     -- Table: public.user_comments
     -- DROP TABLE public.user_comments;
@@ -148,7 +149,7 @@ module.exports = {
     )
     TABLESPACE pg_default;
     ALTER TABLE public.user_comments
-        OWNER to postgres;
+        OWNER to ${process.env.DB_USER};
         
     CREATE OR REPLACE VIEW public.image_highres
     AS
@@ -159,7 +160,7 @@ module.exports = {
         WHERE u.resolution::text = 'highres'::text;
     
     ALTER TABLE public.image_highres
-        OWNER TO postgres;
+        OWNER TO ${process.env.DB_USER};
     
     CREATE OR REPLACE VIEW public.image_thumbnails
     AS
@@ -170,7 +171,7 @@ module.exports = {
         WHERE u.resolution::text = 'thumbnail'::text;
     
     ALTER TABLE public.image_thumbnails
-        OWNER TO postgres;
+        OWNER TO ${process.env.DB_USER};
 
         `);
   },
