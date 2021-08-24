@@ -23,14 +23,6 @@ exports.deleteImage = async (req, res, next) => {
   process(res, func, errMessage);
 };
 
-exports.getInactive = async (req, res, next) => {
-  const errMessage = "Error returned from database getting inactive images";
-  const func = async () => {
-    return gallery.getInactive();
-  };
-  process(res, func, errMessage);
-};
-
 exports.getAll = async (req, res, next) => {
   const errMessage = "Error returned from database getting all image thumbnails";
   const func = async () => {

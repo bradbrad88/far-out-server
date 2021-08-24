@@ -4,10 +4,9 @@ const sql = require("./sql").gallery;
 exports.getGallery = async () => {
   try {
     const result = await query(sql.get());
-    const options = await query(sql.getColumnOptions());
-    return [{ imageGallery: result.rows, options: options.rows[0] }, null];
+    return [result.rows, null];
   } catch (error) {
-    return [null, error.message];
+    return [null, error];
   }
 };
 
@@ -17,18 +16,7 @@ exports.deleteItems = async image_ids => {
     return [true, null];
   } catch (error) {
     console.log(error.message);
-    return [null, error.message];
-  }
-};
-
-exports.getInactive = async () => {
-  try {
-    await query(sql.removeStaleImages());
-    const result = await query(sql.getInactive());
-    return [result.rows, null];
-  } catch (error) {
-    console.log("Error getting inactive images from gallery:", error.message);
-    return [null, error.message];
+    return [null, error];
   }
 };
 
@@ -86,15 +74,6 @@ exports.setDisplay = async displayData => {
     return [true, null];
   } catch (error) {
     console.log(error);
-    return [null, error.message];
-  }
-};
-
-exports.getColumnOptions = async () => {
-  try {
-    const result = await query(sql.getColumnOptions());
-    return [result.rows[0], null];
-  } catch (error) {
     return [null, error.message];
   }
 };

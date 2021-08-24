@@ -188,13 +188,6 @@ exports.gallery = {
     DELETE FROM image_display *`;
   },
 
-  getColumnOptions: () => {
-    return `
-    SELECT
-      gallery_columns
-    FROM gallery_settings`;
-  },
-
   removeStaleImages: () => {
     return `
     DELETE FROM image_gallery
