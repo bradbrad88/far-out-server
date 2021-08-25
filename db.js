@@ -6,6 +6,12 @@ const pool = new Pool({
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASS,
   port: 5432,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
 });
 
 const runQuery = async query => {
