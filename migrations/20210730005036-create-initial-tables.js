@@ -85,7 +85,7 @@ module.exports = {
         y integer,
         w integer,
         h integer,
-        CONSTRAINT image_display_image_id_fkey FOREIGN KEY (image_id)
+        CONSTRAINT image_display_i_fkey FOREIGN KEY (i)
             REFERENCES public.image_gallery (image_id) MATCH SIMPLE
             ON UPDATE NO ACTION
             ON DELETE CASCADE
