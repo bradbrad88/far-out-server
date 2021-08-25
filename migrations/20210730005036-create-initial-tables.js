@@ -80,7 +80,7 @@ module.exports = {
     -- DROP TABLE public.image_display;
     CREATE TABLE IF NOT EXISTS public.image_display
     (
-        image_id integer,
+        i integer,
         x integer,
         y integer,
         w integer,
