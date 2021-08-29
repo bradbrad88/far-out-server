@@ -6,10 +6,14 @@ require("dotenv").config();
 const router = require("./router");
 const cleanS3 = require("./services/cleanS3");
 
+const corsOptions = {
+  methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+};
+
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 router(app);
 
 const port = process.env.PORT || 5000;
