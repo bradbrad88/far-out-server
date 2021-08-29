@@ -2,6 +2,7 @@ const jwt = require("jwt-simple");
 const users = require("../models/user");
 require("dotenv").config();
 const verifyClient = async (info, done) => {
+  console.log("new client authenticating", info.req.url);
   const url = new URL(info.req.url, info.origin);
   const token = url.searchParams.get("auth");
   const decoded = jwt.decode(token, process.env.JWT_SECRET);

@@ -4,6 +4,14 @@ const cleanS3 = require("../services/cleanS3");
 const ImageUploadHandler = require("../services/imageUploadHandler");
 const UploadHandler = new ImageUploadHandler();
 
+exports.test = async (req, res, next) => {
+  const errMessage = "Websocket Test Error";
+  const func = async () => {
+    return UploadHandler.test();
+  };
+  process(res, func, errMessage);
+};
+
 exports.getGallery = async (req, res, next) => {
   const errMessage = "Error returned from database when trying to get image gallery";
   const func = async () => {

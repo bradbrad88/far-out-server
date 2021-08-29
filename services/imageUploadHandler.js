@@ -16,6 +16,10 @@ class ImageUploadHandler {
     this.wss.broadcast = this.broadcast;
   }
 
+  test = () => {
+    console.log("images", this.images);
+  };
+
   broadcast = status => {
     this.wss.clients.forEach(client => {
       client.send(status);

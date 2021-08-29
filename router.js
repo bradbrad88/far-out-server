@@ -14,6 +14,7 @@ module.exports = app => {
   app.get("/gallery", Gallery.getGallery);
   // app.get("/gallery/inactive", requireAdmin, Gallery.getInactive);
   app.get("/gallery/all", requireAdmin, Gallery.getAll);
+  app.get("/test");
   app.post("/gallery/delete", requireAdmin, Gallery.deleteImage);
   app.post(
     "/gallery/insert",
