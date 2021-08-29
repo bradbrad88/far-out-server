@@ -1,7 +1,8 @@
 const WebSocket = require("ws");
 const verifyClient = require("./services/verifyWsClient");
 require("dotenv").config();
-const port = process.env.PORT || 5001;
+let port = process.env.PORT || 5000;
+port++;
 const galleryWss = new WebSocket.Server({
   port: port,
   verifyClient: verifyClient,
