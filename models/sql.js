@@ -163,10 +163,10 @@ exports.gallery = {
     };
   },
 
-  newImage: (desc, user) => {
+  newImage: user => {
     return {
-      text: `INSERT INTO image_gallery (image_desc, uploaded_by) VALUES ($1, $2) RETURNING image_id`,
-      values: [desc, user],
+      text: `INSERT INTO image_gallery (uploaded_by) VALUES ($1) RETURNING image_id`,
+      values: [user],
     };
   },
 

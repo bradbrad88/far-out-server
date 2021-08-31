@@ -16,13 +16,11 @@ module.exports = app => {
   app.get("/gallery/all", requireAdmin, Gallery.getAll);
   app.get("/test");
   app.post("/gallery/delete", requireAdmin, Gallery.deleteImage);
-  app.post(
-    "/gallery/insert",
-    requireAdmin,
-    upload.single("image"),
-    Gallery.addImage
-  );
+  app.get("/gallery/insert", requireAdmin, Gallery.getNewImageId);
+  app.post("/gallery/post", upload.single("image"), requireAdmin, Gallery.postImage);
   app.post("/gallery/display", requireAdmin, Gallery.setDisplay);
+  app.get("/gallery/subscribe/:id", Gallery.subscribe);
+  app.get("/gallery/log", Gallery.logImages);
   app.get("/auth", requireAdmin, Authentication.authenticated);
   app.post("/auth/google", Authentication.signin);
   app.post("/edit/blog", requireAdmin, Blog.newBlog);

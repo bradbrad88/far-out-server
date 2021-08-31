@@ -15,21 +15,19 @@ const THUMBNAIL_WIDTH = 1000;
 const HIGHRES_WIDTH = 4000;
 
 class ImageUpload extends EventEmitter {
-  constructor(image, imageData) {
+  constructor(image, image_id) {
     super();
     this.status = [];
     this.image = image;
-    this.imageData = imageData;
     this.retries = 0;
     this.urls = {};
     this.valid = this.validImage();
     this.fileExtension = this.getFileExtension();
-    this.dbId = new Promise(this.getDbId);
+    this.image_id = image_id;
     this.aspectRatio = new Promise(this.getAspectRatio);
   }
 
   async getStatus() {
-    const image_id = await this.dbId;
     const aspect_ratio = await this.aspectRatio;
     const status = this.status.map(item => ({
       step: item.step,
@@ -39,46 +37,45 @@ class ImageUpload extends EventEmitter {
       error: item.error,
     }));
     const complete = this.status.filter(status => !status.complete).length === 0;
-    if (this.error) this.emit("error", image_id);
-    if (complete) this.emit("complete", image_id);
-    return JSON.stringify({
-      key: this.key,
+    if (this.error) this.emit("error", this.image_id);
+    if (complete) this.emit("complete", this.image_id);
+    return {
       status: status,
       error: this.error,
       complete: complete,
-      image_id: image_id,
+      image_id: this.image_id,
       url: this.url,
       aspect_ratio,
-    });
+    };
   }
 
   async validImage() {}
 
-  getDbId = async (resolve, reject) => {
-    try {
-      const { key, user, description } = this.imageData;
-      Object.assign(this, { key, user });
-      const type = this.image.mimetype;
-      if (!key || !type || !user) {
-        console.log("Error: essential data missing from image, unable to upload.");
-        return reject(null);
-      }
-      if (!type === "image/jpeg" && !type === "image/png") {
-        console.log("Error: incorrect file type: ", type);
-        return reject(null);
-      }
-      const dbId = await gallery.newImage(description, user.user_id);
-      if (dbId[0]) {
-        resolve(dbId[0]);
-      } else {
-        reject(dbId[1]);
-      }
-    } catch (error) {
-      console.log("Error validating image for upload: ", error.message);
-      this.error = error.message;
-      return reject(null);
-    }
-  };
+  // getDbId = async (resolve, reject) => {
+  //   try {
+  //     const { key, user, description } = this.imageData;
+  //     Object.assign(this, { key, user });
+  //     const type = this.image.mimetype;
+  //     if (!key || !type || !user) {
+  //       console.log("Error: essential data missing from image, unable to upload.");
+  //       return reject(null);
+  //     }
+  //     if (!type === "image/jpeg" && !type === "image/png") {
+  //       console.log("Error: incorrect file type: ", type);
+  //       return reject(null);
+  //     }
+  //     const dbId = await gallery.newImage(description, user.user_id);
+  //     if (dbId[0]) {
+  //       resolve(dbId[0]);
+  //     } else {
+  //       reject(dbId[1]);
+  //     }
+  //   } catch (error) {
+  //     console.log("Error validating image for upload: ", error.message);
+  //     this.error = error.message;
+  //     return reject(null);
+  //   }
+  // };
 
   getAspectRatio = async (resolve, reject) => {
     try {
@@ -269,15 +266,22 @@ class UpdateDB extends Status {
   async init() {
     try {
       const urls = await Promise.all(Object.values(this.Image.urls));
-      const image_id = await Promise.resolve(this.Image.dbId);
       const aspectRatio = await this.Image.aspectRatio;
-      console.log(aspectRatio);
       this.update(() => (this.inProgress = true));
       const data = urls.map(url => {
-        return [image_id, url.location, url.key, url.bucket, url.resolution];
+        return [
+          this.Image.image_id,
+          url.location,
+          url.key,
+          url.bucket,
+          url.resolution,
+        ];
       });
       const urlResult = await gallery.addUrls(data);
-      const completeResult = await gallery.setComplete(image_id, aspectRatio);
+      const completeResult = await gallery.setComplete(
+        this.Image.image_id,
+        aspectRatio
+      );
       this.update(() => (this.complete = true));
     } catch (error) {
       this.Image.error = "Error updating database.";

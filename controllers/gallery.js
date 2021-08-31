@@ -4,14 +4,6 @@ const cleanS3 = require("../services/cleanS3");
 const ImageUploadHandler = require("../services/imageUploadHandler");
 const UploadHandler = new ImageUploadHandler();
 
-exports.test = async (req, res, next) => {
-  const errMessage = "Websocket Test Error";
-  const func = async () => {
-    return UploadHandler.test();
-  };
-  process(res, func, errMessage);
-};
-
 exports.getGallery = async (req, res, next) => {
   const errMessage = "Error returned from database when trying to get image gallery";
   const func = async () => {
@@ -39,13 +31,36 @@ exports.getAll = async (req, res, next) => {
   process(res, func, errMessage);
 };
 
-exports.addImage = async (req, res, next) => {
-  const errMessage = "Error returned from database adding new images";
+exports.postImage = async (req, res, next) => {
+  const errMessage = "Error returned from database posting new image";
   const func = async () => {
     req.body.user = req.user;
-    return await UploadHandler.newImage(req.file, req.body);
+    return await UploadHandler.newImage(req.file, req.body.id);
   };
   process(res, func, errMessage);
+};
+
+exports.getNewImageId = async (req, res, next) => {
+  const errMessage = "Error returned from database adding new image";
+  const func = async () => {
+    console.log(req.user);
+    const user = req.user.user_id;
+    return await gallery.newImage(user);
+  };
+  process(res, func, errMessage);
+};
+
+exports.subscribe = async (req, res, next) => {
+  const { id } = req.params;
+  res.set({
+    "Cache-Control": "no-cache",
+    "Content-Type": "text/event-stream",
+    Connection: "keep-alive",
+  });
+  res.status(200);
+  res.flushHeaders();
+  res.write("retry: 5000\n\n");
+  UploadHandler.subscribe(res, id);
 };
 
 exports.setDisplay = async (req, res) => {
@@ -54,4 +69,9 @@ exports.setDisplay = async (req, res) => {
     return await gallery.setDisplay(req.body);
   };
   process(res, func, errMessage);
+};
+
+exports.logImages = async (req, res) => {
+  UploadHandler.logImages();
+  res.status(204).end();
 };
