@@ -6,25 +6,12 @@ class ImageUploadHandler {
   constructor() {
     this.images = [];
     this.wss = galleryWss;
-    // this.wsInit();
     this.subscriptions = [];
   }
 
   subscribe = (res, image_id) => {
     this.subscriptions = [...this.subscriptions, { image_id, res }];
-    // console.log(
-    //   "subscriptions",
-    //   this.subscriptions.map(sub => sub.id)
-    // );
   };
-
-  // wsInit() {
-  //   this.wss.on("connection", async (ws, req) => {
-  //     ws.id = req.id;
-  //     this.getStatus(ws);
-  //   });
-  //   this.wss.broadcast = this.broadcast;
-  // }
 
   logImages = () => {
     console.log(
@@ -38,14 +25,9 @@ class ImageUploadHandler {
   };
 
   broadcast = status => {
-    // this.wss.clients.forEach(client => {
-    //   client.send(status);
-    // });
-    // console.log("status", status);
     const subs = this.subscriptions.filter(
       sub => parseInt(sub.image_id) === parseInt(status.image_id)
     );
-    // console.log("subs", subs);
     subs.forEach(sub => {
       const { res } = sub;
       res.write(`data: ${JSON.stringify(status)}\n\n`);
@@ -57,7 +39,6 @@ class ImageUploadHandler {
           subscription => subscription !== sub
         );
       }
-      // console.log("res", res);
     });
   };
 

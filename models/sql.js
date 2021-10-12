@@ -144,6 +144,7 @@ exports.gallery = {
   },
 
   setDisplay: displayData => {
+    console.log(displayData);
     const values = mapSetOfObjects(displayData);
     const query = `
     DELETE FROM image_display *;

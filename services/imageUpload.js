@@ -4,12 +4,13 @@ const sharp = require("sharp");
 const aws = require("aws-sdk");
 const EventEmitter = require("events");
 const path = require("path");
-const BUCKET = "far-out-photography-gallery";
+// const BUCKET = "far-out-photography-gallery";
 require("dotenv").config();
+const { AWS_KEY_ID, AWS_SECRET_KEY, AWS_REGION, AWS_BUCKET } = process.env;
 const s3 = new aws.S3({
-  accessKeyId: process.env.AWS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_KEY,
-  region: process.env.REGION,
+  accessKeyId: AWS_KEY_ID,
+  secretAccessKey: AWS_SECRET_KEY,
+  region: AWS_REGION,
 });
 const THUMBNAIL_WIDTH = 1000;
 const HIGHRES_WIDTH = 4000;
@@ -185,7 +186,7 @@ class UploadThumbnail extends Status {
 
         const params = {
           Body: body,
-          Bucket: BUCKET,
+          Bucket: AWS_BUCKET,
           Key: this.Image.generateFilename(),
           ACL: "public-read",
         };
@@ -228,7 +229,7 @@ class UploadHighres extends Status {
         const body = await this.Image.highresBuffer;
         const params = {
           Body: body,
-          Bucket: BUCKET,
+          Bucket: AWS_BUCKET,
           Key: this.Image.generateFilename(),
           ACL: "public-read",
         };
