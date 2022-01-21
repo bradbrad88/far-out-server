@@ -164,11 +164,16 @@ exports.gallery = {
     };
   },
 
-  newImage: user => {
-    return {
-      text: `INSERT INTO image_gallery (uploaded_by) VALUES ($1) RETURNING image_id`,
-      values: [user],
+  newImage: (user, count) => {
+    const values = () => {
+      let result = `(${user})`;
+      for (let i = 1; i < count; i++) {
+        result = result.concat(`, (${user})`);
+      }
+      return result;
     };
+    // return values();
+    return `INSERT INTO image_gallery (uploaded_by) VALUES ${values()} RETURNING image_id`;
   },
 
   addUrls: data => {

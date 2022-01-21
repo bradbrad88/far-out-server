@@ -39,10 +39,10 @@ exports.setComplete = async (image_id, aspectRatio) => {
   }
 };
 
-exports.newImage = async user => {
+exports.newImage = async (user, count) => {
   try {
-    const result = await query(sql.newImage(user));
-    return [result.rows[0].image_id, null];
+    const result = await query(sql.newImage(user, count));
+    return [result.rows, null];
   } catch (error) {
     console.log("Error adding new image:", error.message);
     return [null, error.message];

@@ -9,8 +9,8 @@ class ImageUploadHandler {
     this.subscriptions = [];
   }
 
-  subscribe = (res, image_id) => {
-    this.subscriptions = [...this.subscriptions, { image_id, res }];
+  subscribe = res => {
+    this.subscriptions = [...this.subscriptions, { res }];
   };
 
   logImages = () => {

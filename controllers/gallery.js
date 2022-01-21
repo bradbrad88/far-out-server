@@ -44,8 +44,10 @@ exports.getNewImageId = async (req, res, next) => {
   const errMessage = "Error returned from database adding new image";
   const func = async () => {
     console.log(req.user);
+    console.log(req.body);
     const user = req.user.user_id;
-    return await gallery.newImage(user);
+    const count = req.body.imageCount;
+    return await gallery.newImage(user, count);
   };
   process(res, func, errMessage);
 };
